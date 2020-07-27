@@ -48,12 +48,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
     post:
       summary: Zone 생성
       tags:
@@ -217,12 +211,6 @@ paths:
                 $ref: '#/components/schemas/Error'
         '403':
           description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Not Found
           content:
             application/json:
               schema:

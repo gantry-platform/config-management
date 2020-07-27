@@ -34,8 +34,7 @@ public interface DnsApi {
         @ApiResponse(code = 200, message = "Success", response = Zone.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
-        @ApiResponse(code = 404, message = "Not Found", response = Error.class) })
+        @ApiResponse(code = 403, message = "Forbidden", response = Error.class) })
     @RequestMapping(value = "/zones",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
@@ -91,8 +90,7 @@ public interface DnsApi {
         @ApiResponse(code = 200, message = "Success", response = Record.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
-        @ApiResponse(code = 404, message = "Not Found", response = Error.class) })
+        @ApiResponse(code = 403, message = "Forbidden", response = Error.class) })
     @RequestMapping(value = "/zones/{zone}/records",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
