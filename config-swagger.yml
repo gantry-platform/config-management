@@ -393,3 +393,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Zone:
+      type: object
+      properties:
+        name:
+          type: string
+        zoneId:
+          type: string
+    Record:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        values:
+          type: array
+          items:
+            type: string
+        ttl:
+          type: integer
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
