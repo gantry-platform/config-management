@@ -25,7 +25,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2020-07-27T13:45:48.110+09:00[Asia/Seoul]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2020-07-27T16:19:55.143+09:00[Asia/Seoul]")
 @Api(value = "Dns", description = "the Dns API")
 public interface DnsApi {
 
@@ -42,6 +42,22 @@ public interface DnsApi {
     ResponseEntity<List<Zone>> zonesGet();
 
 
+    @ApiOperation(value = "Zone 생성", nickname = "zonesPost", notes = "", response = Zone.class, tags={ "dns", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Success", response = Zone.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
+        @ApiResponse(code = 404, message = "Not Found", response = Error.class),
+        @ApiResponse(code = 409, message = "Conflict", response = Error.class) })
+    @RequestMapping(value = "/zones",
+        produces = { "application/json" }, 
+        consumes = { "application/json" },
+        method = RequestMethod.POST)
+    ResponseEntity<Zone> zonesPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Zone body
+);
+
+
     @ApiOperation(value = "Zone 삭제", nickname = "zonesZoneDelete", notes = "", tags={ "dns", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Success"),
@@ -56,18 +72,17 @@ public interface DnsApi {
 );
 
 
-    @ApiOperation(value = "Zone 생성", nickname = "zonesZonePost", notes = "", response = Zone.class, tags={ "dns", })
+    @ApiOperation(value = "Zone 조회", nickname = "zonesZoneGet", notes = "", response = Zone.class, tags={ "dns", })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Success", response = Zone.class),
         @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
         @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
-        @ApiResponse(code = 404, message = "Not Found", response = Error.class),
-        @ApiResponse(code = 409, message = "Conflict", response = Error.class) })
+        @ApiResponse(code = 404, message = "Not Found", response = Error.class) })
     @RequestMapping(value = "/zones/{zone}",
         produces = { "application/json" }, 
-        method = RequestMethod.POST)
-    ResponseEntity<Zone> zonesZonePost(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+        method = RequestMethod.GET)
+    ResponseEntity<Zone> zonesZoneGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 );
 
 
@@ -82,6 +97,24 @@ public interface DnsApi {
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<List<Record>> zonesZoneRecordsGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+);
+
+
+    @ApiOperation(value = "Record 생성", nickname = "zonesZoneRecordsPost", notes = "", response = Record.class, tags={ "dns", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Success", response = Record.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
+        @ApiResponse(code = 404, message = "Not Found", response = Error.class),
+        @ApiResponse(code = 409, message = "Conflict", response = Error.class) })
+    @RequestMapping(value = "/zones/{zone}/records",
+        produces = { "application/json" }, 
+        consumes = { "application/json" },
+        method = RequestMethod.POST)
+    ResponseEntity<Record> zonesZoneRecordsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
+,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
 );
 
 
@@ -111,24 +144,6 @@ public interface DnsApi {
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<Record> zonesZoneRecordsRecordGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
-);
-
-
-    @ApiOperation(value = "Record 생성", nickname = "zonesZoneRecordsRecordPost", notes = "", response = Record.class, tags={ "dns", })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Success", response = Record.class),
-        @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
-        @ApiResponse(code = 404, message = "Not Found", response = Error.class),
-        @ApiResponse(code = 409, message = "Conflict", response = Error.class) })
-    @RequestMapping(value = "/zones/{zone}/records/{record}",
-        produces = { "application/json" }, 
-        consumes = { "application/json" },
-        method = RequestMethod.POST)
-    ResponseEntity<Record> zonesZoneRecordsRecordPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
-,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
 );
 

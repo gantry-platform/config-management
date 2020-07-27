@@ -3,10 +3,13 @@ package ai.gantry.configmanagement.api;
 import ai.gantry.configmanagement.model.Error;
 import ai.gantry.configmanagement.model.Record;
 import ai.gantry.configmanagement.model.Zone;
+import ai.gantry.configmanagement.service.DnsWrapper;
+import ai.gantry.configmanagement.service.Route53Impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2020-07-27T13:45:48.110+09:00[Asia/Seoul]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2020-07-27T16:19:55.143+09:00[Asia/Seoul]")
 @Controller
 public class DnsApiController implements DnsApi {
 
@@ -33,6 +36,9 @@ public class DnsApiController implements DnsApi {
     private final ObjectMapper objectMapper;
 
     private final HttpServletRequest request;
+    // TODO: Interface를 유지하면서 dependency injection 처리
+    @Autowired
+    private DnsWrapper dnsWrapper;
 
     @org.springframework.beans.factory.annotation.Autowired
     public DnsApiController(ObjectMapper objectMapper, HttpServletRequest request) {
@@ -41,6 +47,8 @@ public class DnsApiController implements DnsApi {
     }
 
     public ResponseEntity<List<Zone>> zonesGet() {
+        return new ResponseEntity<List<Zone>>(dnsWrapper.getZones(), HttpStatus.OK);
+        /*
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
@@ -52,6 +60,22 @@ public class DnsApiController implements DnsApi {
         }
 
         return new ResponseEntity<List<Zone>>(HttpStatus.NOT_IMPLEMENTED);
+         */
+    }
+
+    public ResponseEntity<Zone> zonesPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Zone body
+) {
+        String accept = request.getHeader("Accept");
+        if (accept != null && accept.contains("application/json")) {
+            try {
+                return new ResponseEntity<Zone>(objectMapper.readValue("{\n  \"name\" : \"name\",\n  \"zoneId\" : \"zoneId\"\n}", Zone.class), HttpStatus.NOT_IMPLEMENTED);
+            } catch (IOException e) {
+                log.error("Couldn't serialize response for content type application/json", e);
+                return new ResponseEntity<Zone>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        return new ResponseEntity<Zone>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     public ResponseEntity<Void> zonesZoneDelete(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
@@ -60,7 +84,7 @@ public class DnsApiController implements DnsApi {
         return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    public ResponseEntity<Zone> zonesZonePost(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+    public ResponseEntity<Zone> zonesZoneGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
@@ -90,14 +114,8 @@ public class DnsApiController implements DnsApi {
         return new ResponseEntity<List<Record>>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    public ResponseEntity<Void> zonesZoneRecordsRecordDelete(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
-) {
-        String accept = request.getHeader("Accept");
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    public ResponseEntity<Record> zonesZoneRecordsRecordGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+    public ResponseEntity<Record> zonesZoneRecordsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
+,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
 ) {
         String accept = request.getHeader("Accept");
@@ -113,8 +131,14 @@ public class DnsApiController implements DnsApi {
         return new ResponseEntity<Record>(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    public ResponseEntity<Record> zonesZoneRecordsRecordPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
-,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+    public ResponseEntity<Void> zonesZoneRecordsRecordDelete(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
+) {
+        String accept = request.getHeader("Accept");
+        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    public ResponseEntity<Record> zonesZoneRecordsRecordGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
 ) {
         String accept = request.getHeader("Accept");

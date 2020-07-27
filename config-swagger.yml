@@ -54,9 +54,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /zones/{zone}:
     post:
       summary: Zone 생성
+      tags:
+        - dns
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Zone'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Zone'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /zones/{zone}:
+    get:
+      summary: Zone 조회
       tags:
         - dns
       parameters:
@@ -93,12 +140,6 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: Conflict
           content:
             application/json:
               schema:
@@ -186,55 +227,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /zones/{zone}/records/{record}:
-    get:
-      summary: Record 정보 조회
-      tags:
-        - dns
-      parameters:
-        - name: zone
-          in: path
-          required: true
-          description: zone name
-          schema:
-            type: string
-        - name: record
-          in: path
-          required: true
-          description: record name
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Record'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
     post:
       summary: Record 생성
       tags:
@@ -291,6 +283,55 @@ paths:
                 $ref: '#/components/schemas/Error'
         '409':
           description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /zones/{zone}/records/{record}:
+    get:
+      summary: Record 정보 조회
+      tags:
+        - dns
+      parameters:
+        - name: zone
+          in: path
+          required: true
+          description: zone name
+          schema:
+            type: string
+        - name: record
+          in: path
+          required: true
+          description: record name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Record'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
           content:
             application/json:
               schema:
