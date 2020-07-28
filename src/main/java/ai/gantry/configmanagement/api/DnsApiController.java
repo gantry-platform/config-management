@@ -48,19 +48,6 @@ public class DnsApiController implements DnsApi {
 
     public ResponseEntity<List<Zone>> zonesGet() {
         return new ResponseEntity<List<Zone>>(dnsWrapper.getZones(), HttpStatus.OK);
-        /*
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<List<Zone>>(objectMapper.readValue("[ {\n  \"name\" : \"name\",\n  \"zoneId\" : \"zoneId\"\n}, {\n  \"name\" : \"name\",\n  \"zoneId\" : \"zoneId\"\n} ]", List.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<List<Zone>>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
-        return new ResponseEntity<List<Zone>>(HttpStatus.NOT_IMPLEMENTED);
-         */
     }
 
     public ResponseEntity<Zone> zonesPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Zone body
@@ -85,33 +72,29 @@ public class DnsApiController implements DnsApi {
     }
 
     public ResponseEntity<Zone> zonesZoneGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<Zone>(objectMapper.readValue("{\n  \"name\" : \"name\",\n  \"zoneId\" : \"zoneId\"\n}", Zone.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<Zone>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+) throws Exception {
+        if(!zone.endsWith(".")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be ended with .(dot)");
         }
-
-        return new ResponseEntity<Zone>(HttpStatus.NOT_IMPLEMENTED);
+        Zone zoneInfo = dnsWrapper.getZone(zone);
+        if(zoneInfo == null) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND, "There is no zone named: " + zone);
+        }
+        return new ResponseEntity<Zone>(zoneInfo, HttpStatus.OK);
     }
 
     public ResponseEntity<List<Record>> zonesZoneRecordsGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<List<Record>>(objectMapper.readValue("[ {\n  \"values\" : [ \"values\", \"values\" ],\n  \"name\" : \"name\",\n  \"type\" : \"type\",\n  \"ttl\" : 0\n}, {\n  \"values\" : [ \"values\", \"values\" ],\n  \"name\" : \"name\",\n  \"type\" : \"type\",\n  \"ttl\" : 0\n} ]", List.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<List<Record>>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+) throws Exception {
+        if(!zone.endsWith(".")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be ended with .(dot)");
         }
 
-        return new ResponseEntity<List<Record>>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            List<Record> records = dnsWrapper.getRecords(zone);
+            return new ResponseEntity<List<Record>>(records, HttpStatus.OK);
+        } catch(Exception e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "There is no zone named: " + zone);
+        }
     }
 
     public ResponseEntity<Record> zonesZoneRecordsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
@@ -140,18 +123,24 @@ public class DnsApiController implements DnsApi {
 
     public ResponseEntity<Record> zonesZoneRecordsRecordGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
-) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<Record>(objectMapper.readValue("{\n  \"values\" : [ \"values\", \"values\" ],\n  \"name\" : \"name\",\n  \"type\" : \"type\",\n  \"ttl\" : 0\n}", Record.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<Record>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+,@NotNull @ApiParam(value = "record type", required = true) @Valid @RequestParam(value = "type", required = true) String type
+) throws Exception {
+        if(!zone.endsWith(".") || !record.endsWith(".")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone and record name should be ended with .(dot)");
         }
 
-        return new ResponseEntity<Record>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            Record recordInfo = dnsWrapper.getRecord(zone, record, type);
+            if (recordInfo == null) {
+                throw new NotFoundException(HttpStatus.NOT_FOUND,
+                        "There is no record named: " + record + " type: " + type);
+            }
+            return new ResponseEntity<Record>(recordInfo, HttpStatus.OK);
+        } catch(NotFoundException e) {
+            throw e;
+        } catch(Exception e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "There is no zone named: " + zone);
+        }
     }
 
     public ResponseEntity<Record> zonesZoneRecordsRecordPut(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body

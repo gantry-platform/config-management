@@ -12,9 +12,9 @@ public interface DnsWrapper {
     void deleteZone(String zoneName);
     Zone getZone(String zoneName);
 
-    List<Record> getRecords(String zoneName);
+    List<Record> getRecords(String zoneName) throws Exception;
     Record createRecord(String zoneName, Record record);
 
     void deleteRecord(String zoneName, String recordName);
-    Record getRecord(String zoneName, String recordName);
+    Record getRecord(String zoneName, String recordName, String type) throws Exception;
 }

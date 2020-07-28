@@ -82,7 +82,7 @@ public interface DnsApi {
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<Zone> zonesZoneGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-);
+) throws Exception;
 
 
     @ApiOperation(value = "Record 리스트 조회", nickname = "zonesZoneRecordsGet", notes = "", response = Record.class, responseContainer = "List", tags={ "dns", })
@@ -95,7 +95,7 @@ public interface DnsApi {
         produces = { "application/json" }, 
         method = RequestMethod.GET)
     ResponseEntity<List<Record>> zonesZoneRecordsGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-);
+) throws Exception;
 
 
     @ApiOperation(value = "Record 생성", nickname = "zonesZoneRecordsPost", notes = "", response = Record.class, tags={ "dns", })
@@ -132,18 +132,19 @@ public interface DnsApi {
 
 
     @ApiOperation(value = "Record 정보 조회", nickname = "zonesZoneRecordsRecordGet", notes = "", response = Record.class, tags={ "dns", })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Success", response = Record.class),
-        @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
-        @ApiResponse(code = 404, message = "Not Found", response = Error.class) })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = Record.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
+            @ApiResponse(code = 404, message = "Not Found", response = Error.class) })
     @RequestMapping(value = "/zones/{zone}/records/{record}",
-        produces = { "application/json" }, 
-        method = RequestMethod.GET)
+            produces = { "application/json" },
+            method = RequestMethod.GET)
     ResponseEntity<Record> zonesZoneRecordsRecordGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
-);
+,@NotNull @ApiParam(value = "record type", required = true) @Valid @RequestParam(value = "type", required = true) String type
+) throws Exception;
 
 
     @ApiOperation(value = "Record 변경", nickname = "zonesZoneRecordsRecordPut", notes = "", response = Record.class, tags={ "dns", })

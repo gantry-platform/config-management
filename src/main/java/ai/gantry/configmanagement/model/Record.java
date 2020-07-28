@@ -15,7 +15,7 @@ import javax.validation.constraints.*;
  * Record
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2020-07-27T16:19:55.143+09:00[Asia/Seoul]")
+@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2020-07-28T13:23:07.360+09:00[Asia/Seoul]")
 public class Record   {
   @JsonProperty("name")
   private String name = null;
@@ -27,8 +27,11 @@ public class Record   {
   @Valid
   private List<String> values = null;
 
+  @JsonProperty("alias")
+  private String alias = null;
+
   @JsonProperty("ttl")
-  private Integer ttl = null;
+  private Long ttl = null;
 
   public Record name(String name) {
     this.name = name;
@@ -38,10 +41,10 @@ public class Record   {
   /**
    * Get name
    * @return name
-  **/
+   **/
   @ApiModelProperty(value = "")
-  
-    public String getName() {
+
+  public String getName() {
     return name;
   }
 
@@ -57,10 +60,10 @@ public class Record   {
   /**
    * Get type
    * @return type
-  **/
+   **/
   @ApiModelProperty(value = "")
-  
-    public String getType() {
+
+  public String getType() {
     return type;
   }
 
@@ -84,10 +87,10 @@ public class Record   {
   /**
    * Get values
    * @return values
-  **/
+   **/
   @ApiModelProperty(value = "")
-  
-    public List<String> getValues() {
+
+  public List<String> getValues() {
     return values;
   }
 
@@ -95,7 +98,26 @@ public class Record   {
     this.values = values;
   }
 
-  public Record ttl(Integer ttl) {
+  public Record alias(String alias) {
+    this.alias = alias;
+    return this;
+  }
+
+  /**
+   * Get alias
+   * @return alias
+   **/
+  @ApiModelProperty(value = "")
+
+  public String getAlias() {
+    return alias;
+  }
+
+  public void setAlias(String alias) {
+    this.alias = alias;
+  }
+
+  public Record ttl(Long ttl) {
     this.ttl = ttl;
     return this;
   }
@@ -103,20 +125,20 @@ public class Record   {
   /**
    * Get ttl
    * @return ttl
-  **/
+   **/
   @ApiModelProperty(value = "")
-  
-    public Integer getTtl() {
+
+  public Long getTtl() {
     return ttl;
   }
 
-  public void setTtl(Integer ttl) {
+  public void setTtl(Long ttl) {
     this.ttl = ttl;
   }
 
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(java.lang.Object o) {
     if (this == o) {
       return true;
     }
@@ -125,24 +147,26 @@ public class Record   {
     }
     Record record = (Record) o;
     return Objects.equals(this.name, record.name) &&
-        Objects.equals(this.type, record.type) &&
-        Objects.equals(this.values, record.values) &&
-        Objects.equals(this.ttl, record.ttl);
+            Objects.equals(this.type, record.type) &&
+            Objects.equals(this.values, record.values) &&
+            Objects.equals(this.alias, record.alias) &&
+            Objects.equals(this.ttl, record.ttl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, type, values, ttl);
+    return Objects.hash(name, type, values, alias, ttl);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class Record {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    values: ").append(toIndentedString(values)).append("\n");
+    sb.append("    alias: ").append(toIndentedString(alias)).append("\n");
     sb.append("    ttl: ").append(toIndentedString(ttl)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -152,7 +176,7 @@ public class Record   {
    * Convert the given object to string with each line indented by 4 spaces
    * (except the first line).
    */
-  private String toIndentedString(Object o) {
+  private String toIndentedString(java.lang.Object o) {
     if (o == null) {
       return "null";
     }

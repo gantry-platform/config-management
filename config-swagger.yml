@@ -293,6 +293,12 @@ paths:
           description: record name
           schema:
             type: string
+        - name: type
+          in: query
+          required: true
+          description: record type
+          schema:
+            type: string
       responses:
         '200':
           description: Success
@@ -443,8 +449,10 @@ components:
           type: array
           items:
             type: string
+        alias:
+          type: string
         ttl:
-          type: integer
+          type: long
     Error:
       type: object
       properties:

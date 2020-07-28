@@ -8,8 +8,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.route53.Route53Client;
-import software.amazon.awssdk.services.route53.model.HostedZone;
-import software.amazon.awssdk.services.route53.model.ListHostedZonesResponse;
+import software.amazon.awssdk.services.route53.model.*;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -23,6 +22,9 @@ public class Route53Impl implements DnsWrapper {
 
     @Value("${aws.route53.secretAccessKey}")
     private String secretAccessKey;
+
+    @Value("${domain.postfix}")
+    private String domainPostFix;
     private Route53Client client;
 
     @PostConstruct
@@ -40,6 +42,9 @@ public class Route53Impl implements DnsWrapper {
         List<Zone> zones = new ArrayList<>();
         ListHostedZonesResponse res = client.listHostedZones();
         for(HostedZone z : res.hostedZones()) {
+            if(!z.name().endsWith(domainPostFix)) {
+                continue;
+            }
             Zone zone = new Zone();
             zone.setName(z.name());
             zone.setZoneId(z.id());
@@ -60,12 +65,54 @@ public class Route53Impl implements DnsWrapper {
 
     @Override
     public Zone getZone(String zoneName) {
-        return null;
+        Zone zone = null;
+//        ListHostedZonesByNameRequest.builder().dnsName()
+//        client.listHostedZonesByName()
+        ListHostedZonesResponse res = client.listHostedZones();
+        for(HostedZone z : res.hostedZones()) {
+            if(!z.name().endsWith(domainPostFix)) {
+                continue;
+            }
+
+            if(z.name().equals(zoneName)) {
+                zone = new Zone();
+                zone.setName(z.name());
+                zone.setZoneId(z.id());
+                break;
+            }
+        }
+        return zone;
     }
 
     @Override
-    public List<Record> getRecords(String zoneName) {
-        return null;
+    public List<Record> getRecords(String zoneName) throws Exception {
+        Zone zone = getZone(zoneName);
+        if(zone == null) {
+            throw new Exception("No zone");
+        }
+
+        List<Record> records = new ArrayList<>();
+        ListResourceRecordSetsRequest req = ListResourceRecordSetsRequest.builder()
+                .hostedZoneId(zone.getZoneId()).build();
+        ListResourceRecordSetsResponse res = client.listResourceRecordSets(req);
+        for(ResourceRecordSet r : res.resourceRecordSets()) {
+            Record record = new Record();
+            record.setName(r.name());
+            record.setType(r.typeAsString());
+
+            List<String> values = new ArrayList<>();
+            for(ResourceRecord v : r.resourceRecords()) {
+                values.add(v.value());
+            }
+            record.setValues(values);
+            AliasTarget alias = r.aliasTarget();
+            if(alias != null) {
+                record.setAlias(alias.dnsName());
+            }
+            record.setTtl(r.ttl());
+            records.add(record);
+        }
+        return records;
     }
 
     @Override
@@ -79,7 +126,40 @@ public class Route53Impl implements DnsWrapper {
     }
 
     @Override
-    public Record getRecord(String zoneName, String recordName) {
-        return null;
+    public Record getRecord(String zoneName, String recordName, String type) throws Exception {
+        Zone zone = getZone(zoneName);
+        if(zone == null) {
+            throw new Exception("No zone");
+        }
+
+        Record record = null;
+        ListResourceRecordSetsRequest req = ListResourceRecordSetsRequest.builder()
+                .hostedZoneId(zone.getZoneId()).build();
+        ListResourceRecordSetsResponse res = client.listResourceRecordSets(req);
+        for(ResourceRecordSet r : res.resourceRecordSets()) {
+            if(!r.name().equals(recordName)) {
+                continue;
+            }
+
+            if(!r.typeAsString().equals(type)) {
+                continue;
+            }
+
+            record = new Record();
+            record.setName(r.name());
+            record.setType(r.typeAsString());
+
+            List<String> values = new ArrayList<>();
+            for(ResourceRecord v : r.resourceRecords()) {
+                values.add(v.value());
+            }
+            record.setValues(values);
+            AliasTarget alias = r.aliasTarget();
+            if(alias != null) {
+                record.setAlias(alias.dnsName());
+            }
+            record.setTtl(r.ttl());
+        }
+        return record;
     }
 }
