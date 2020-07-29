@@ -1,5 +1,6 @@
 package ai.gantry.configmanagement.service;
 
+import ai.gantry.configmanagement.api.ZoneAlreadyExistException;
 import ai.gantry.configmanagement.model.Record;
 import ai.gantry.configmanagement.model.Zone;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +30,6 @@ public class Route53Impl implements DnsWrapper {
 
     @PostConstruct
     public void init() {
-//        System.out.println("id:" + accessKeyId + " key:" + secretAccessKey);
         AwsBasicCredentials cred = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
         client = Route53Client.builder()
                 .region(Region.AWS_GLOBAL)
@@ -45,29 +45,47 @@ public class Route53Impl implements DnsWrapper {
             if(!z.name().endsWith(domainPostFix)) {
                 continue;
             }
-            Zone zone = new Zone();
-            zone.setName(z.name());
-            zone.setZoneId(z.id());
-            zones.add(zone);
+            zones.add(makeZone(z));
         }
         return zones;
     }
 
     @Override
-    public Zone createZone(String zoneName) {
-        return null;
+    public Zone createZone(String zoneName) throws Exception {
+        if(exists(zoneName)) {
+            throw new ZoneAlreadyExistException("Already exists");
+        }
+        String ref = Long.toString(System.currentTimeMillis());
+        CreateHostedZoneRequest req = CreateHostedZoneRequest.builder().callerReference(ref).name(zoneName).build();
+        CreateHostedZoneResponse res = client.createHostedZone(req);
+        HostedZone created = res.hostedZone();
+        return makeZone(created);
+    }
+
+    private Zone makeZone(HostedZone z) {
+        Zone zone = new Zone();
+        zone.setName(z.name());
+        zone.setZoneId(z.id());
+        return zone;
+    }
+
+    private boolean exists(String zoneName) {
+        Zone zone = getZone(zoneName);
+        return zone != null;
     }
 
     @Override
     public void deleteZone(String zoneName) {
-
+        Zone zone = getZone(zoneName);
+        if(zone != null) {
+            DeleteHostedZoneRequest req = DeleteHostedZoneRequest.builder().id(zone.getZoneId()).build();
+            client.deleteHostedZone(req);
+        }
     }
 
     @Override
     public Zone getZone(String zoneName) {
         Zone zone = null;
-//        ListHostedZonesByNameRequest.builder().dnsName()
-//        client.listHostedZonesByName()
         ListHostedZonesResponse res = client.listHostedZones();
         for(HostedZone z : res.hostedZones()) {
             if(!z.name().endsWith(domainPostFix)) {
@@ -75,9 +93,7 @@ public class Route53Impl implements DnsWrapper {
             }
 
             if(z.name().equals(zoneName)) {
-                zone = new Zone();
-                zone.setName(z.name());
-                zone.setZoneId(z.id());
+                zone = makeZone(z);
                 break;
             }
         }

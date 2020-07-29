@@ -54,7 +54,7 @@ public interface DnsApi {
         consumes = { "application/json" },
         method = RequestMethod.POST)
     ResponseEntity<Zone> zonesPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Zone body
-);
+) throws Exception;
 
 
     @ApiOperation(value = "Zone 삭제", nickname = "zonesZoneDelete", notes = "", tags={ "dns", })
@@ -68,7 +68,7 @@ public interface DnsApi {
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
     ResponseEntity<Void> zonesZoneDelete(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-);
+) throws Exception;
 
 
     @ApiOperation(value = "Zone 조회", nickname = "zonesZoneGet", notes = "", response = Zone.class, tags={ "dns", })

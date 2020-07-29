@@ -51,24 +51,31 @@ public class DnsApiController implements DnsApi {
     }
 
     public ResponseEntity<Zone> zonesPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Zone body
-) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<Zone>(objectMapper.readValue("{\n  \"name\" : \"name\",\n  \"zoneId\" : \"zoneId\"\n}", Zone.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<Zone>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+) throws Exception {
+        String zoneName = body.getName();
+        if(zoneName == null || zoneName.isEmpty()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be specified.");
+        }
+        if(!zoneName.endsWith(".")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be ended with .(dot)");
         }
 
-        return new ResponseEntity<Zone>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            Zone created = dnsWrapper.createZone(zoneName);
+            return new ResponseEntity<Zone>(created, HttpStatus.OK);
+        } catch(ZoneAlreadyExistException e) {
+            throw new ApiException(HttpStatus.CONFLICT, "Duplicated zone name: " + zoneName);
+        }
     }
 
     public ResponseEntity<Void> zonesZoneDelete(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-) {
-        String accept = request.getHeader("Accept");
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+) throws Exception {
+        if(!zone.endsWith(".")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be ended with .(dot)");
+        }
+
+        dnsWrapper.deleteZone(zone);
+        return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
     public ResponseEntity<Zone> zonesZoneGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone

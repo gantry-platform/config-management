@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface DnsWrapper {
     List<Zone> getZones();
-    Zone createZone(String zoneName);
+    Zone createZone(String zoneName) throws Exception;
 
     void deleteZone(String zoneName);
     Zone getZone(String zoneName);
