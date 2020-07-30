@@ -18,6 +18,7 @@
         <java.version>1.8</java.version>
         <springfox-version>2.9.2</springfox-version>
         <aws.java.sdk.version>2.13.58</aws.java.sdk.version>
+        <start-class>ai.gantry.configmanagement.ConfigManagementApplication</start-class>
     </properties>
 
     <dependencies>

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: configuration
+  name: configuration
+  namespace: gantry
+spec:
+  selector:
+    matchLabels:
+      app: configuration
+  template:
+    metadata:
+      labels:
+        app: configuration
+    spec:
+      containers:
+        - name: configuration
+          image: harbor.gantry.ai/gantry/config-management:0.1
+          env:
+            - name: AWS_ROUTE53_ACCESSKEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-cred
+                  key: route53_accesskey_id
+            - name: AWS_ROUTE53_SECRET_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-cred
+                  key: route53_secret_accesskey
+      imagePullSecrets:
+        - name: harbor-cred
