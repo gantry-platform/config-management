@@ -125,6 +125,27 @@ public class DnsApiController implements DnsApi {
         }
     }
 
+    public ResponseEntity<Record> zonesZoneRecordsPut(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
+            ,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+    ) throws Exception {
+        log.info(String.format("Update a record in a zone: %s", zone));
+        if(!zone.endsWith(".") || !body.getName().endsWith(".")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone and record name should be ended with .(dot)");
+        }
+
+        try {
+            Record record = dnsWrapper.updateRecord(zone, body);
+            return new ResponseEntity<Record>(record, HttpStatus.OK);
+        } catch(ZoneNotFoundException e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "There is no zone named: " + zone);
+        } catch(RecordNotFoundException e) {
+            throw new NotFoundException(HttpStatus.NOT_FOUND,
+                    String.format("There is no record %s:%s in zone: %s ", body.getType(), body.getName(), zone));
+        } catch(Exception e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
     public ResponseEntity<Void> zonesZoneRecordsRecordDelete(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
             ,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
             ,@NotNull @ApiParam(value = "record type", required = true) @Valid @RequestParam(value = "type", required = true) String type
@@ -140,7 +161,7 @@ public class DnsApiController implements DnsApi {
         } catch(ZoneNotFoundException e) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "There is no zone named: " + zone);
         } catch(RecordNotFoundException e) {
-            throw new ApiException(HttpStatus.BAD_REQUEST,
+            throw new NotFoundException(HttpStatus.NOT_FOUND,
                     String.format("There is no %s type record: %s in zone: %s", type, record, zone));
         }
     }
@@ -165,22 +186,4 @@ public class DnsApiController implements DnsApi {
             throw new ApiException(HttpStatus.BAD_REQUEST, "There is no zone named: " + zone);
         }
     }
-
-    public ResponseEntity<Record> zonesZoneRecordsRecordPut(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
-,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
-) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<Record>(objectMapper.readValue("{\n  \"values\" : [ \"values\", \"values\" ],\n  \"name\" : \"name\",\n  \"type\" : \"type\",\n  \"ttl\" : 0\n}", Record.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<Record>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
-        return new ResponseEntity<Record>(HttpStatus.NOT_IMPLEMENTED);
-    }
-
 }

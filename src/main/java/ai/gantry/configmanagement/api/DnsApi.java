@@ -114,6 +114,22 @@ public interface DnsApi {
     ) throws Exception;
 
 
+    @ApiOperation(value = "Record 변경", nickname = "zonesZoneRecordsPut", notes = "", response = Record.class, tags={ "dns", })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = Record.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
+            @ApiResponse(code = 404, message = "Not Found", response = Error.class) })
+    @RequestMapping(value = "/zones/{zone}/records",
+            produces = { "application/json" },
+            consumes = { "application/json" },
+            method = RequestMethod.PUT)
+    ResponseEntity<Record> zonesZoneRecordsPut(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
+            ,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+    ) throws Exception;
+
+
     @ApiOperation(value = "Record 삭제", nickname = "zonesZoneRecordsRecordDelete", notes = "", tags={ "dns", })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success"),
@@ -144,22 +160,5 @@ public interface DnsApi {
 ,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
 ,@NotNull @ApiParam(value = "record type", required = true) @Valid @RequestParam(value = "type", required = true) String type
 ) throws Exception;
-
-
-    @ApiOperation(value = "Record 변경", nickname = "zonesZoneRecordsRecordPut", notes = "", response = Record.class, tags={ "dns", })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Success", response = Record.class),
-        @ApiResponse(code = 400, message = "Bad Request", response = Error.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = Error.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = Error.class),
-        @ApiResponse(code = 404, message = "Not Found", response = Error.class) })
-    @RequestMapping(value = "/zones/{zone}/records/{record}",
-        produces = { "application/json" }, 
-        consumes = { "application/json" },
-        method = RequestMethod.PUT)
-    ResponseEntity<Record> zonesZoneRecordsRecordPut(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
-,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
-);
 
 }

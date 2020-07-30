@@ -14,6 +14,7 @@ public interface DnsWrapper {
 
     List<Record> getRecords(String zoneName) throws Exception;
     Record createRecord(String zoneName, Record record) throws Exception;
+    Record updateRecord(String zoneName, Record record) throws Exception;
 
     void deleteRecord(String zoneName, String recordName, String type) throws Exception;
     Record getRecord(String zoneName, String recordName, String type) throws Exception;

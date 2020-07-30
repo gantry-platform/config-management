@@ -198,6 +198,32 @@ public class Route53Impl implements DnsWrapper {
         return getRecord(zone.getName(), record.getName(), record.getType());
     }
 
+    @Override
+    public Record updateRecord(String zoneName, Record record) throws Exception {
+        Zone zone = getZone(zoneName);
+        if(zone == null) {
+            logger.warn(String.format("No such zone: %s", zoneName));
+            throw new ZoneNotFoundException();
+        }
+
+        if(!isExistRecord(zoneName, record.getName(), record.getType())) {
+            logger.warn(String.format("No such record. %s type: %s in zone: %s",
+                    record.getType(), record.getName(), zoneName));
+            throw new RecordNotFoundException();
+        }
+
+        logger.info(String.format("Updating a record in a zone named: %s", zoneName));
+        logger.info(String.format("Record to be updated: %s", record.toString()));
+
+        List<Change> changes = makeRecordChanges(ChangeAction.UPSERT, Arrays.asList(record));
+        ChangeBatch batch = ChangeBatch.builder().changes(changes).build();
+        ChangeResourceRecordSetsRequest req = ChangeResourceRecordSetsRequest.builder()
+                .hostedZoneId(zone.getZoneId()).changeBatch(batch).build();
+        client.changeResourceRecordSets(req);
+
+        return getRecord(zone.getName(), record.getName(), record.getType());
+    }
+
     private void deleteNonRequiredRecords(String zoneName) throws Exception {
         Zone zone = getZone(zoneName);
         if(zone == null) {
@@ -264,25 +290,6 @@ public class Route53Impl implements DnsWrapper {
             throw new RecordNotFoundException();
         }
 
-        /*
-        String alias = record.getAlias();
-        ResourceRecordSet.Builder builder = ResourceRecordSet.builder();
-        if(alias != null) {
-            logger.info(String.format("Alias target: %s", alias));
-            AliasTarget target = AliasTarget.builder().dnsName(alias).build();
-            builder = builder.aliasTarget(target);
-        } else {
-            List<ResourceRecord> records = new ArrayList<>();
-            for(String v : record.getValues()) {
-                ResourceRecord r = ResourceRecord.builder().value(v).build();
-                records.add(r);
-            }
-            builder = builder.resourceRecords(records).type(record.getType().toUpperCase()).ttl(record.getTtl());
-        }
-
-        ResourceRecordSet recordSet = builder.name(record.getName()).build();
-        Change change = Change.builder().action(ChangeAction.DELETE).resourceRecordSet(recordSet).build();
-         */
         List<Change> changes = makeRecordChanges(ChangeAction.DELETE, Arrays.asList(record));
         ChangeBatch batch = ChangeBatch.builder().changes(changes).build();
         ChangeResourceRecordSetsRequest req = ChangeResourceRecordSetsRequest.builder()
