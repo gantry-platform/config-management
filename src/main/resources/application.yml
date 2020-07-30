@@ -1,0 +1,28 @@
+spring:
+  profiles:
+    active: local
+---
+spring:
+  profiles: local
+  jackson:
+    date-format: 'yyyy-MM-dd HH:mm:ss'
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+springfox:
+  documentation:
+    swagger:
+      v2:
+        path: /api-docs
+
+server:
+  contextPath: /
+  port: 8080
+
+aws:
+  route53:
+    accessKeyId: ${AWS_ROUTE53_ACCESSKEY_ID:-}
+    secretAccessKey: ${AWS_ROUTE53_SECRET_ACCESSKEY:-}
+
+domain:
+  postfix: gantry.ai.
