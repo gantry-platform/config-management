@@ -48,16 +48,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /zones/{zone}:
     post:
       summary: Zone 생성
       tags:
         - dns
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Zone'
+      parameters:
+        - name: zone
+          in: path
+          required: true
+          description: zone name
+          schema:
+            type: string
       responses:
         '200':
           description: Success
@@ -95,7 +97,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /zones/{zone}:
     get:
       summary: Zone 조회
       tags:
@@ -226,12 +227,6 @@ paths:
           description: zone name
           schema:
             type: string
-        - name: record
-          in: path
-          required: true
-          description: record name
-          schema:
-            type: string
       requestBody:
         required: true
         content:
@@ -345,6 +340,12 @@ paths:
           in: path
           required: true
           description: record name
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: true
+          description: record type
           schema:
             type: string
       responses:

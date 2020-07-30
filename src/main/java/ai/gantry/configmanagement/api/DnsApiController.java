@@ -50,26 +50,24 @@ public class DnsApiController implements DnsApi {
         return new ResponseEntity<List<Zone>>(dnsWrapper.getZones(), HttpStatus.OK);
     }
 
-    public ResponseEntity<Zone> zonesPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Zone body
-) throws Exception {
-        String zoneName = body.getName();
-        if(zoneName == null || zoneName.isEmpty()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be specified.");
-        }
-        if(!zoneName.endsWith(".")) {
+    public ResponseEntity<Zone> zonesZonePost(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+    ) throws Exception {
+        log.info(String.format("Create zone: %s", zone));
+        if(!zone.endsWith(".")) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be ended with .(dot)");
         }
 
         try {
-            Zone created = dnsWrapper.createZone(zoneName);
+            Zone created = dnsWrapper.createZone(zone);
             return new ResponseEntity<Zone>(created, HttpStatus.OK);
         } catch(ZoneAlreadyExistException e) {
-            throw new ApiException(HttpStatus.CONFLICT, "Duplicated zone name: " + zoneName);
+            throw new ApiException(HttpStatus.CONFLICT, "Duplicated zone name: " + zone);
         }
     }
 
     public ResponseEntity<Void> zonesZoneDelete(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ) throws Exception {
+        log.info(String.format("Delete zone: %s", zone));
         if(!zone.endsWith(".")) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be ended with .(dot)");
         }
@@ -80,6 +78,7 @@ public class DnsApiController implements DnsApi {
 
     public ResponseEntity<Zone> zonesZoneGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ) throws Exception {
+        log.info(String.format("Get zone: %s", zone));
         if(!zone.endsWith(".")) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be ended with .(dot)");
         }
@@ -92,6 +91,7 @@ public class DnsApiController implements DnsApi {
 
     public ResponseEntity<List<Record>> zonesZoneRecordsGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ) throws Exception {
+        log.info(String.format("Get records in zone: %s", zone));
         if(!zone.endsWith(".")) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Zone name should be ended with .(dot)");
         }
@@ -99,39 +99,57 @@ public class DnsApiController implements DnsApi {
         try {
             List<Record> records = dnsWrapper.getRecords(zone);
             return new ResponseEntity<List<Record>>(records, HttpStatus.OK);
-        } catch(Exception e) {
+        } catch(ZoneNotFoundException e) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "There is no zone named: " + zone);
         }
     }
 
     public ResponseEntity<Record> zonesZoneRecordsPost(@ApiParam(value = "" ,required=true )  @Valid @RequestBody Record body
-,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
-) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<Record>(objectMapper.readValue("{\n  \"values\" : [ \"values\", \"values\" ],\n  \"name\" : \"name\",\n  \"type\" : \"type\",\n  \"ttl\" : 0\n}", Record.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<Record>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+            ,@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
+    ) throws Exception {
+        log.info(String.format("Create a record in a zone: %s", zone));
+        if(!zone.endsWith(".") || !body.getName().endsWith(".")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone and record name should be ended with .(dot)");
         }
 
-        return new ResponseEntity<Record>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            Record record = dnsWrapper.createRecord(zone, body);
+            return new ResponseEntity<Record>(record, HttpStatus.OK);
+        } catch(ZoneNotFoundException e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "There is no zone named: " + zone);
+        } catch(RecordAlreadyExistException e) {
+            throw new ApiException(HttpStatus.CONFLICT,
+                    String.format("There is a record %s:%s in zone: %s ", body.getType(), body.getName(), zone));
+        } catch(Exception e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     public ResponseEntity<Void> zonesZoneRecordsRecordDelete(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
-,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
-) {
-        String accept = request.getHeader("Accept");
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+            ,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
+            ,@NotNull @ApiParam(value = "record type", required = true) @Valid @RequestParam(value = "type", required = true) String type
+    ) throws Exception {
+        log.info(String.format("Delete a record in a zone: %s", zone));
+        if(!zone.endsWith(".") || !record.endsWith(".")) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Zone and record name should be ended with .(dot)");
+        }
+
+        try {
+            dnsWrapper.deleteRecord(zone, record, type);
+            return new ResponseEntity<Void>(HttpStatus.OK);
+        } catch(ZoneNotFoundException e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "There is no zone named: " + zone);
+        } catch(RecordNotFoundException e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST,
+                    String.format("There is no %s type record: %s in zone: %s", type, record, zone));
+        }
     }
 
     public ResponseEntity<Record> zonesZoneRecordsRecordGet(@ApiParam(value = "zone name",required=true) @PathVariable("zone") String zone
 ,@ApiParam(value = "record name",required=true) @PathVariable("record") String record
 ,@NotNull @ApiParam(value = "record type", required = true) @Valid @RequestParam(value = "type", required = true) String type
 ) throws Exception {
+        log.info(String.format("Get a record: %s in zone: %s", record, zone));
         if(!zone.endsWith(".") || !record.endsWith(".")) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "Zone and record name should be ended with .(dot)");
         }
@@ -143,9 +161,7 @@ public class DnsApiController implements DnsApi {
                         "There is no record named: " + record + " type: " + type);
             }
             return new ResponseEntity<Record>(recordInfo, HttpStatus.OK);
-        } catch(NotFoundException e) {
-            throw e;
-        } catch(Exception e) {
+        } catch(ZoneNotFoundException e) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "There is no zone named: " + zone);
         }
     }
