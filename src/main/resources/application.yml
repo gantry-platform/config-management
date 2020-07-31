@@ -26,3 +26,8 @@ aws:
 
 domain:
   postfix: gantry.ai.
+
+temp:
+  auth:
+    id: ${BASIC_AUTH_ID:-}
+    password: ${BASIC_AUTH_PASSWORD:-}

@@ -17,6 +17,7 @@ spec:
       containers:
         - name: configuration
           image: harbor.gantry.ai/gantry/config-management:0.1
+          imagePullPolicy: Always
           env:
             - name: AWS_ROUTE53_ACCESSKEY_ID
               valueFrom:
@@ -28,5 +29,15 @@ spec:
                 secretKeyRef:
                   name: aws-cred
                   key: route53_secret_accesskey
+            - name: BASIC_AUTH_ID
+              valueFrom:
+                secretKeyRef:
+                  name: temp-cred
+                  key: id
+            - name: BASIC_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: temp-cred
+                  key: password
       imagePullSecrets:
         - name: harbor-cred
