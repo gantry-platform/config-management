@@ -242,11 +242,13 @@ public class Route53Impl implements DnsWrapper {
         }
         logger.info(String.format("Non required records to be deleted: %s", records.toString()));
 
-        List<Change> changes = makeRecordChanges(ChangeAction.DELETE, records);
-        ChangeBatch batch = ChangeBatch.builder().changes(changes).build();
-        ChangeResourceRecordSetsRequest req = ChangeResourceRecordSetsRequest.builder()
-                .hostedZoneId(zone.getZoneId()).changeBatch(batch).build();
-        client.changeResourceRecordSets(req);
+        if(!records.isEmpty()) {
+            List<Change> changes = makeRecordChanges(ChangeAction.DELETE, records);
+            ChangeBatch batch = ChangeBatch.builder().changes(changes).build();
+            ChangeResourceRecordSetsRequest req = ChangeResourceRecordSetsRequest.builder()
+                    .hostedZoneId(zone.getZoneId()).changeBatch(batch).build();
+            client.changeResourceRecordSets(req);
+        }
     }
 
     private List<Change> makeRecordChanges(ChangeAction action, List<Record> records) {
